@@ -1,0 +1,145 @@
+# Prompts Configuration for Call2Action
+# These prompts are used to generate meeting summaries and action items
+
+# Prompt for summarizing individual chunks of the transcript
+chunk_summary:
+  template: |
+    You are an expert at analyzing and summarizing meeting transcripts.
+
+    Write a comprehensive and detailed summary of the following meeting transcript segment IN ENGLISH.
+    Even if the transcript is in another language, your summary MUST be in English.
+
+    Capture ALL important information from this segment, including:
+    - Main topics and themes discussed
+    - Key points, ideas, and concepts mentioned
+    - Participant contributions and perspectives
+    - Technical details (if discussing technology, systems, or tools)
+    - Business context (if discussing strategy, planning, or operations)
+    - Problems, challenges, or concerns raised
+    - Solutions, approaches, or alternatives proposed
+    - Decisions made or discussed
+    - Action items, tasks, or next steps mentioned
+    - Timeline or deadline discussions
+    - Questions raised or clarifications needed
+
+    Be thorough and detailed - capture the essence and context of the discussion.
+    Do not oversimplify technical or business terminology.
+    
+    IMPORTANT: Write the entire summary in English, regardless of the transcript language.
+
+    Transcript Segment:
+    {text}
+
+    DETAILED SUMMARY (IN ENGLISH):
+
+# Prompt for combining grouped chunk summaries into intermediate summaries
+group_summary:
+  template: |
+    You are combining multiple summaries from different parts of a meeting into one cohesive summary.
+
+    IMPORTANT: Write the summary entirely in ENGLISH, regardless of the language in the individual parts.
+
+    Individual summaries from parts of the meeting:
+    {text}
+
+    Create a COMPREHENSIVE summary IN ENGLISH that:
+    1. Combines all information from the individual summaries
+    2. Organizes topics and themes logically
+    3. Maintains all important details and context
+    4. Preserves specific names, terms, and references
+    5. Includes all decisions, action items, and next steps
+    6. Removes redundancy while keeping all unique information
+    7. Maintains the narrative flow of the discussion
+
+    COMBINED SUMMARY (IN ENGLISH):
+
+# Prompt for creating the final comprehensive meeting summary
+final_summary:
+  template: |
+    You are creating a comprehensive summary of a meeting by combining summaries from different parts of the discussion.
+
+    IMPORTANT: Write the final summary entirely in ENGLISH, regardless of the language in the individual summaries.
+
+    Individual summaries from different parts of the meeting:
+    {combined_text}
+
+    Create a COMPREHENSIVE and WELL-STRUCTURED meeting summary IN ENGLISH with the following sections:
+
+    **MEETING OVERVIEW**
+    - What was this meeting about? (main purpose and context)
+    - Key themes and topics discussed
+
+    **PARTICIPANTS** (if identifiable from the summaries)
+    - Who participated or was mentioned
+    - Roles or perspectives represented
+
+    **KEY DISCUSSION POINTS**
+    - Main topics covered in detail
+    - Important points, ideas, and perspectives shared
+    - Context and background information discussed
+    - Technical details, business context, or specific information relevant to the topic
+
+    **DECISIONS MADE** (if any)
+    - List specific decisions that were made
+    - Include the rationale or context when available
+    - If no decisions were made, state: "No formal decisions were made during this meeting."
+
+    **ACTION ITEMS** (if any)
+    - List specific tasks, next steps, or follow-ups
+    - Include who is responsible (if mentioned)
+    - Note any deadlines or timeframes (if mentioned)
+    - If no action items were identified, state: "No specific action items were identified during this meeting."
+
+    **OPEN QUESTIONS OR CONCERNS** (if any)
+    - Unresolved issues or questions raised
+    - Topics requiring further discussion or investigation
+
+    GUIDELINES:
+    - Maintain all important details and context from the individual summaries
+    - Organize information logically and clearly
+    - Be specific and detailed - avoid vague generalizations
+    - Preserve technical terminology, proper names, and specific references
+    - Remove redundancy while keeping all unique information
+    - Be honest about what was or wasn't covered (e.g., if no decisions were made, say so)
+    - Adapt the level of technical detail to match the meeting content
+    - If certain sections don't apply (e.g., no decisions made), explicitly state that
+
+    FINAL COMPREHENSIVE MEETING SUMMARY (IN ENGLISH):
+
+# Prompt for extracting action items from the meeting
+action_items:
+  template: |
+    You are an expert at extracting actionable items from meeting transcripts and summaries.
+
+    Based on the following meeting summary, identify and list ALL specific actionable items, tasks, decisions requiring follow-up, and next steps.
+
+    For each action item, be specific and clear about:
+    - WHAT needs to be done (the specific task or action)
+    - WHO should do it (if mentioned or implied)
+    - WHY it's needed (the context or reason, if clear)
+    - WHEN it should be done (deadline or timeframe, if mentioned)
+    - Any relevant details or dependencies
+
+    Include these types of items:
+    - Specific tasks explicitly assigned or discussed
+    - Follow-up actions needed
+    - Information to be gathered or research to be conducted
+    - Documents to be created, updated, or reviewed
+    - Code, systems, or technical work to be done
+    - Meetings or discussions to be scheduled
+    - Communications to be sent
+    - Decisions that still need to be made
+    - Issues or blockers that need resolution
+    - Questions that need answers
+
+    Meeting Summary:
+    {context}
+
+    INSTRUCTIONS:
+    - List each action item on a separate line
+    - Be comprehensive - include ALL actionable items mentioned
+    - Be specific and clear about what needs to be done
+    - If no action items were identified, respond with: "No specific action items were identified."
+    - Format: Just the action items, one per line, no numbering or bullets
+
+    ACTION ITEMS:

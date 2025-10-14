@@ -8,6 +8,7 @@ from langchain_openai import ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from call2action.config import Settings
+from call2action.prompts import PromptManager
 
 
 class Summarizer:
@@ -16,6 +17,9 @@ class Summarizer:
     def __init__(self, settings: Settings):
         """Initialize the summarizer with OpenAI configuration."""
         self.settings = settings
+        
+        # Load prompts from YAML file
+        self.prompt_manager = PromptManager(settings.prompts_file)
         
         # Initialize LangChain ChatOpenAI model
         llm_params = {
@@ -64,29 +68,9 @@ class Summarizer:
         print(f"   📄 Split transcript into {len(docs)} chunks")
         print("   🔄 Summarizing chunks in parallel...")
         
-        # Custom prompt for chunk summarization
+        # Load chunk summary prompt from configuration
         chunk_prompt_template = ChatPromptTemplate.from_template(
-            """You are an expert at summarizing technical software development meetings.
-
-Write a comprehensive and detailed summary of the following meeting transcript segment IN ENGLISH.
-Even if the transcript is in another language, your summary MUST be in English.
-
-This is a technical discussion about software development, so include:
-- Technical terms, architecture decisions, and implementation details
-- Specific technologies, tools, frameworks, or systems mentioned
-- Problems discussed and proposed solutions
-- Design decisions and their rationale
-- Performance, scalability, or maintenance concerns
-- Team structure and responsibilities
-- Timeline or prioritization discussions
-
-Be thorough and technical - don't oversimplify.
-IMPORTANT: Write the entire summary in English, regardless of the transcript language.
-
-Transcript Segment:
-{text}
-
-DETAILED SUMMARY (IN ENGLISH):"""
+            self.prompt_manager.chunk_summary
         )
         
         # Create a summarization chain for a single chunk
@@ -176,23 +160,9 @@ DETAILED SUMMARY (IN ENGLISH):"""
                     for j, summary in enumerate(group, start=i)
                 ])
                 
-                # Create intermediate summary for this group
+                # Load group summary prompt from configuration
                 group_prompt = ChatPromptTemplate.from_template(
-                    """You are combining multiple summaries from a technical meeting into one cohesive summary.
-
-IMPORTANT: Write the summary entirely in ENGLISH, regardless of the language in the individual parts.
-
-Individual summaries from parts of the meeting:
-{text}
-
-Create a COMPREHENSIVE summary IN ENGLISH that:
-1. Combines all technical information
-2. Organizes topics logically
-3. Maintains all technical details and decisions
-4. Includes action items and responsibilities
-5. Removes redundancy while keeping unique information
-
-COMBINED SUMMARY (IN ENGLISH):"""
+                    self.prompt_manager.group_summary
                 )
                 
                 group_chain = group_prompt | self.llm
@@ -242,24 +212,9 @@ COMBINED SUMMARY (IN ENGLISH):"""
         print(f"   📏 Combined text length: {len(combined_text)} chars")
         print(f"   🤖 Asking LLM to create final combined summary...")
         
+        # Load final summary prompt from configuration
         combine_prompt_template = ChatPromptTemplate.from_template(
-            """You are combining multiple summaries of a technical software development meeting into one comprehensive summary.
-
-IMPORTANT: Write the final summary entirely in ENGLISH, regardless of the language in the individual summaries.
-
-Individual summaries from different parts of the meeting:
-{combined_text}
-
-Create a COMPREHENSIVE and DETAILED final summary IN ENGLISH that:
-1. Combines all the technical information from the individual summaries
-2. Organizes topics logically (architecture, decisions, tasks, team, etc.)
-3. Maintains all technical details, system names, and specific decisions
-4. Includes all action items and next steps mentioned
-5. Preserves team member names and their responsibilities
-6. Keeps the technical depth - don't oversimplify
-7. Removes redundancy while keeping all unique information
-
-FINAL COMPREHENSIVE SUMMARY (IN ENGLISH):"""
+            self.prompt_manager.final_summary
         )
         
         # Use a separate LLM instance with higher max_tokens for final combination
@@ -311,31 +266,9 @@ FINAL COMPREHENSIVE SUMMARY (IN ENGLISH):"""
             transcript_sample = transcript[:sample_length]
             context = f"{summary}\n\nAdditional Context:\n{transcript_sample}"
         
+        # Load action items prompt from configuration
         prompt_template = ChatPromptTemplate.from_template(
-            """You are an expert at extracting actionable items from technical software development meetings.
-
-Based on the following meeting summary, identify and list ALL specific actionable items, tasks, decisions, and next steps.
-
-For each action item, be specific about:
-- WHAT needs to be done
-- WHO should do it (if mentioned)
-- WHY it's needed (if clear from context)
-- Technical details (systems, code, architecture affected)
-
-Include:
-- Tasks explicitly assigned or discussed
-- Technical investigations or research needed
-- Code changes or implementations planned
-- Documentation to be created or updated  
-- Meetings or discussions to be scheduled
-- Decisions that need to be made
-- Issues or blockers that need resolution
-
-Meeting Summary:
-{context}
-
-List each action item on a separate line. Be comprehensive and include ALL actionable items mentioned.
-Format: Just the action items, one per line, no numbering or bullets:"""
+            self.prompt_manager.action_items
         )
         
         action_chain = prompt_template | self.llm

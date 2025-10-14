@@ -29,6 +29,7 @@ class Settings(BaseSettings):
 
     # Pipeline Configuration
     output_dir: Path = Path("output")
+    prompts_file: Path = Path("prompts.yaml")
 
     def __init__(self, **kwargs):
         """Initialize settings and create output directory."""
