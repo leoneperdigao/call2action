@@ -60,8 +60,22 @@ Edit the `.env` file with your settings:
 - `WHISPER_DEVICE`: Device to use (cpu, cuda)
 - `WHISPER_COMPUTE_TYPE`: Compute type (int8, float16, float32)
 - `OUTPUT_DIR`: Directory for output files (default: output)
+- `PROMPTS_FILE`: Path to prompts configuration file (default: prompts.yaml)
 
 **Note**: For large transcripts, the summarizer automatically uses hierarchical processing with increased token limits (up to 8192 tokens for final summaries) to ensure complete summary generation.
+
+### Customizing Prompts
+
+All AI prompts are configured in `prompts.yaml`, making them easy to customize without modifying code. The prompts are designed to handle various meeting types (technical, business, planning, etc.) and generate structured summaries with:
+
+- Meeting overview and context
+- Identified participants
+- Key discussion points
+- Decisions made (or explicitly noting when none were made)
+- Action items and next steps
+- Open questions or concerns
+
+For detailed information on customizing prompts, see [PROMPTS_README.md](PROMPTS_README.md).
 
 ## Usage
 
@@ -162,6 +176,7 @@ call2action/
 │       ├── __init__.py
 │       ├── config.py           # Configuration management
 │       ├── models.py           # Data models
+│       ├── prompts.py          # Prompt management from YAML
 │       ├── transcriber.py      # Faster Whisper transcription
 │       ├── summarizer.py       # OpenAI summarization
 │       ├── pipeline.py         # Main pipeline orchestration
@@ -169,9 +184,11 @@ call2action/
 ├── tests/
 │   ├── __init__.py
 │   └── test_pipeline.py
+├── prompts.yaml               # AI prompts configuration
 ├── pyproject.toml
 ├── .env.example
-└── README.md
+├── README.md
+└── PROMPTS_README.md          # Prompts customization guide
 ```
 
 ## Development
