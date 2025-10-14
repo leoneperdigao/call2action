@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/leoneperdigao/call2action/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📚 Documentation
+    url: https://github.com/leoneperdigao/call2action/blob/main/README.md
+    about: Read the project documentation
+  - name: � Quick Start Guide
+    url: https://github.com/leoneperdigao/call2action/blob/main/docs/quickstart.md
+    about: Get started quickly with Call2Action
+  - name: �🔧 Prompts Configuration
+    url: https://github.com/leoneperdigao/call2action/blob/main/docs/prompts.md
+    about: Learn how to configure prompts and settings

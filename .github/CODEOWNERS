@@ -1,0 +1,22 @@
+# Code Owners for Call2Action
+# These owners will be automatically requested for review when someone opens a PR
+
+# Default owner for everything in the repo
+* @leoneperdigao
+
+# Core source code
+/src/ @leoneperdigao
+
+# Configuration files
+/prompts.yaml @leoneperdigao
+/pyproject.toml @leoneperdigao
+
+# CI/CD workflows
+/.github/ @leoneperdigao
+
+# Documentation
+/*.md @leoneperdigao
+/PROMPTS_README.md @leoneperdigao
+
+# Tests
+/tests/ @leoneperdigao

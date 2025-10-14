@@ -75,7 +75,7 @@ All AI prompts are configured in `prompts.yaml`, making them easy to customize w
 - Action items and next steps
 - Open questions or concerns
 
-For detailed information on customizing prompts, see [PROMPTS_README.md](PROMPTS_README.md).
+For detailed information on customizing prompts, see [docs/prompts.md](docs/prompts.md).
 
 ## Usage
 
@@ -184,11 +184,21 @@ call2action/
 ├── tests/
 │   ├── __init__.py
 │   └── test_pipeline.py
+├── docs/
+│   ├── README.md              # Documentation index
+│   ├── quickstart.md          # Quick start guide
+│   ├── prompts.md             # Prompts customization guide
+│   ├── CONTRIBUTING.md        # Contribution guidelines
+│   ├── SECURITY.md            # Security policy
+│   └── github-*.md            # GitHub configuration docs
+├── .github/                   # GitHub configuration
+│   ├── workflows/             # CI/CD pipelines
+│   ├── ISSUE_TEMPLATE/        # Issue templates
+│   └── ...                    # Other GitHub configs
 ├── prompts.yaml               # AI prompts configuration
 ├── pyproject.toml
 ├── .env.example
-├── README.md
-└── PROMPTS_README.md          # Prompts customization guide
+└── README.md
 ```
 
 ## Development
@@ -237,6 +247,26 @@ The system includes automatic retry logic, but persistent failures may indicate 
 - Try a smaller Whisper model (base instead of large-v3)
 - Use GPU acceleration if available
 - Check your internet connection for OpenAI API calls
+
+## Documentation
+
+- 📖 [Quick Start Guide](docs/quickstart.md) - Get up and running quickly
+- 🎨 [Prompts Customization](docs/prompts.md) - Customize AI prompts
+- 🤝 [Contributing Guide](docs/CONTRIBUTING.md) - How to contribute
+- 🔐 [Security Policy](docs/SECURITY.md) - Security guidelines
+- ⚙️ [GitHub Configuration](docs/github-config.md) - CI/CD setup
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.md) for details on:
+- Development setup
+- Coding standards
+- Testing guidelines
+- Pull request process
+
+## Security
+
+For security concerns, please see our [Security Policy](docs/SECURITY.md).
 
 ## License
 
