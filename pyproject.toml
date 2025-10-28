@@ -15,6 +15,7 @@ dependencies = [
     "langchain-text-splitters>=0.3.0",
     "rich>=13.0.0",
     "pyyaml>=6.0.0",
+    "jinja2>=3.0.0",
 ]
 
 [project.optional-dependencies]

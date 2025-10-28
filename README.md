@@ -4,17 +4,39 @@ A Python project that transcribes video/audio files using Faster Whisper and gen
 
 ## Features
 
+### Single Video Processing
 - 🎤 **Speech-to-Text**: Transcribe audio/video files using Faster Whisper
 - 🤖 **AI Summarization**: Generate intelligent summaries using OpenAI GPT models with LangChain
-- � **Hierarchical Summarization**: Automatically handles long transcripts by:
+- 📊 **Hierarchical Summarization**: Automatically handles long transcripts by:
   - Splitting into manageable chunks
   - Processing chunks in parallel using LangChain's batch() method
   - Creating intermediate group summaries
   - Combining into a final cohesive summary
 - ⚡ **Parallel Processing**: Efficient batch processing of transcript chunks
-- �️ **Robust Error Handling**: Automatic retry logic for failed chunks and groups
+- 🛡️ **Robust Error Handling**: Automatic retry logic for failed chunks and groups
 - 💾 **Smart Caching**: Saves transcripts and summaries to avoid reprocessing
 - 🌍 **Multi-language Support**: Automatically translates summaries to English
+
+### Project Handover Documentation (New!)
+- 📁 **Multi-Video Processing**: Process entire directories of meeting recordings
+- 👔 **Executive Summary**: Business-focused handover for stakeholders
+- ⚙️ **Technical Summary**: Detailed technical documentation for engineers
+- 📈 **Visual Diagrams**: Auto-generated Mermaid diagrams including:
+  - Project timeline with milestones
+  - System architecture and components
+  - Team roles and responsibilities
+  - Decision flow charts
+- 🎨 **Interactive HTML Report**: Beautiful, searchable documentation with:
+  - Side-by-side executive and technical views
+  - Collapsible sections
+  - Responsive design
+  - Print-friendly styling
+- 📝 **Markdown Export**: Separate markdown files for each persona
+- 🔍 **Intelligent Analysis**: Cross-video analysis to identify:
+  - Project themes and context
+  - Key people and their roles
+  - Technical components and relationships
+  - Important decisions and risks
 - 🐍 **Modern Python**: Uses `uv` for fast dependency management
 
 ## Prerequisites
@@ -61,6 +83,7 @@ Edit the `.env` file with your settings:
 - `WHISPER_COMPUTE_TYPE`: Compute type (int8, float16, float32)
 - `OUTPUT_DIR`: Directory for output files (default: output)
 - `PROMPTS_FILE`: Path to prompts configuration file (default: prompts.yaml)
+- `MAX_PARALLEL_VIDEOS`: Maximum number of videos to process simultaneously in handover mode (default: 4)
 
 **Note**: For large transcripts, the summarizer automatically uses hierarchical processing with increased token limits (up to 8192 tokens for final summaries) to ensure complete summary generation.
 
@@ -79,7 +102,9 @@ For detailed information on customizing prompts, see [docs/prompts.md](docs/prom
 
 ## Usage
 
-### Basic Usage
+### Single Video Processing
+
+#### Basic Usage
 
 ```python
 from call2action.pipeline import TranscriptPipeline
@@ -93,10 +118,9 @@ result = pipeline.process("path/to/your/video.mp4")
 # Access results
 print("Transcript:", result.transcript)
 print("Summary:", result.summary)
-# Note: call_to_action is no longer generated in the current version
 ```
 
-### Command Line Interface
+#### Command Line Interface
 
 ```bash
 # Process a video file
@@ -110,6 +134,120 @@ Output files are saved in the `output/` directory:
 - `{filename}_transcript.txt` - Full transcript
 - `{filename}_segments.txt` - Timestamped segments
 - `{filename}_summary.txt` - AI-generated summary
+
+### Project Handover Documentation
+
+Generate comprehensive handover documentation from multiple video files:
+
+#### Command Line
+
+```bash
+# Generate handover documentation from all videos in a directory
+python -m call2action.main handover path/to/videos/
+
+# Force re-processing of all videos
+python -m call2action.main handover path/to/videos/ --force-rerun
+```
+
+#### Python API
+
+```python
+from call2action.handover_pipeline import HandoverPipeline
+
+# Initialize the handover pipeline
+pipeline = HandoverPipeline()
+
+# Generate handover documentation
+report = pipeline.generate_handover("path/to/videos/")
+
+# Access the results
+print(f"Project Overview: {report.project_context.project_overview}")
+print(f"Executive Summary: {report.executive_summary}")
+print(f"Technical Summary: {report.technical_summary}")
+print(f"Diagrams: {list(report.diagrams.keys())}")
+```
+
+#### Output
+
+The handover pipeline generates:
+- **`output/project_handover.html`** - Interactive HTML report with:
+  - Executive and technical summaries
+  - Visual diagrams (timeline, architecture, roles, decisions)
+  - Searchable content
+  - Collapsible sections
+  - Print-friendly styling
+- **`output/handover_markdown/`** - Markdown exports:
+  - `executive_summary.md` - Executive handover document
+  - `technical_summary.md` - Technical handover document
+
+#### Supported Video Formats
+
+The handover pipeline automatically discovers and processes videos in these formats:
+- `.mp4`, `.mov`, `.avi`, `.mkv`, `.webm`, `.m4v`, `.flv`
+
+#### Date Extraction
+
+The pipeline automatically extracts dates from filenames in these formats:
+- `2025-10-27` (YYYY-MM-DD)
+- `2025_10_27` (YYYY_MM_DD)
+- `2025-10-27_10-30-00` (with timestamps)
+- `20251027` (YYYYMMDD)
+
+These dates are used to create the timeline visualization.
+
+#### Performance and Parallel Processing
+
+The handover pipeline processes videos **in parallel** for maximum efficiency with **clean, organized logging**:
+
+- **Default**: 4 videos processed simultaneously
+- **Configurable**: Adjust `MAX_PARALLEL_VIDEOS` in `.env` or settings
+- **Resource-aware**: Balance between speed and system resources
+- **Clean Output**: Progress tracking with color-coded status (📦 Cache, ✅ Done, ❌ Error)
+
+Example output:
+```
+🚀 Processing 40 videos in parallel (max 8 at a time)...
+💡 Using cached results where available
+
+📦 CACHE [ 1/40] 2025-10-06_10-35-48.mp4
+✅ DONE  [ 2/40] 2025-10-07_13-05-55.mp4
+📦 CACHE [ 3/40] 2025-10-08_09-02-13.mp4
+...
+
+============================================================
+✅ Completed 40/40 videos
+   📦 Loaded from cache: 35
+   ⚙️  Newly processed: 5
+   ❌ Errors: 0
+============================================================
+```
+
+Example with custom parallelism:
+
+```python
+from call2action.handover_pipeline import HandoverPipeline
+from call2action.config import Settings
+
+# Process up to 8 videos at once (requires sufficient CPU/RAM)
+settings = Settings(max_parallel_videos=8)
+pipeline = HandoverPipeline(settings=settings)
+report = pipeline.generate_handover("path/to/videos/")
+```
+
+**Performance Tips:**
+- **Smart Caching** (default): The pipeline automatically skips videos that already have summaries
+  - First run: Processes all 40 videos (~2.5 hours with 4 workers)
+  - Subsequent runs: Only regenerates final report (~2 minutes)
+  - Use `--force-rerun` only when you want to reprocess all videos
+- Use GPU (CUDA) for faster Whisper transcription if available
+- Increase `max_parallel_videos` if you have powerful hardware (e.g., 8-16 cores)
+- Decrease it if you experience out-of-memory errors
+- Use smaller Whisper models (base, small) for faster processing
+
+**Example Processing Time** (40 videos on a 4-core system):
+- Sequential: ~10 hours
+- Parallel (4 workers): ~2.5 hours
+- Parallel (8 workers): ~1.5 hours
 
 ### Advanced Usage
 

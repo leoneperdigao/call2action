@@ -61,6 +61,102 @@ def main():
     # actions = summarizer.generate_call_to_action(transcript, summary)
     
     print("You can use individual components separately for more control.\n")
+    
+    # Example 5: Generate Handover Documentation
+    print("=== Example 5: Project Handover Documentation ===\n")
+    
+    from call2action.handover_pipeline import HandoverPipeline
+    
+    handover_pipeline = HandoverPipeline()
+    
+    # Generate handover from all videos in a directory
+    # report = handover_pipeline.generate_handover("path/to/videos/")
+    # print(f"Generated report with {len(report.video_summaries)} videos")
+    # print(f"Project overview: {report.project_context.project_overview[:200]}...")
+    
+    print("This generates comprehensive handover documentation from multiple videos.")
+    print("Outputs: HTML report with executive/technical views and diagrams.\n")
+    
+    # Example 6: Custom Handover Configuration
+    print("=== Example 6: Custom Handover Output ===\n")
+    
+    custom_settings = Settings(
+        output_dir=Path("custom_output"),
+        handover_output_file="team_handover.html",
+        include_individual_summaries=True,
+        openai_model="gpt-4o",  # Use more powerful model for better analysis
+    )
+    
+    handover_pipeline = HandoverPipeline(settings=custom_settings)
+    # report = handover_pipeline.generate_handover("path/to/videos/")
+    
+    print("You can customize output directory and filename for handover reports.\n")
+    
+    # Example 7: Parallel Processing Configuration
+    print("=== Example 7: Parallel Processing for Many Videos ===\n")
+    
+    # For large video collections, increase parallel workers
+    parallel_settings = Settings(
+        max_parallel_videos=8,  # Process 8 videos at once (requires 8+ cores)
+        whisper_model_size="base",  # Use faster model
+        whisper_device="cuda",  # Use GPU for even faster processing
+    )
+    
+    fast_pipeline = HandoverPipeline(settings=parallel_settings)
+    # report = fast_pipeline.generate_handover("path/to/40-videos/")
+    
+    print("Process many videos in parallel for dramatic speed improvements.")
+    print("Example: 40 videos in ~1.5 hours instead of ~10 hours!\n")
+    print("\nPerformance tips:")
+    print("- Use max_parallel_videos = number of CPU cores")
+    print("- Enable CUDA if you have an NVIDIA GPU")
+    print("- Use smaller Whisper models (base/small) for speed")
+    print("- Cached videos are automatically skipped for instant regeneration\n")
+    
+    # Example 8: Smart Caching Behavior
+    print("=== Example 8: Smart Caching for Fast Regeneration ===\n")
+    
+    print("The handover pipeline intelligently uses cached results:")
+    print("\nFirst run (40 videos):")
+    print("  - Transcribes and summarizes all 40 videos")
+    print("  - Takes ~2.5 hours (4 workers) or ~1.5 hours (8 workers)")
+    print("  - Saves transcript and summary for each video")
+    print("\nSubsequent runs (without --force-rerun):")
+    print("  - Loads existing summaries from cache (instant)")
+    print("  - Only regenerates the final handover report")
+    print("  - Takes ~2 minutes total!")
+    print("\nTo reprocess everything:")
+    print("  python -m call2action.main handover path/to/videos/ --force-rerun")
+    print("\nThis means you can:")
+    print("  - Tweak prompts and regenerate reports quickly")
+    print("  - Add new videos without reprocessing old ones")
+    print("  - Experiment with different report formats efficiently\n")
+    
+    # Example 9: Clean Logging with Silent Mode
+    print("=== Example 9: Clean Parallel Processing Logs ===\n")
+    
+    print("The handover pipeline uses clean, organized logging:")
+    print("\nWhen processing multiple videos in parallel, you'll see:")
+    print("  📦 CACHE [ 1/40] 2025-10-06_10-35-48.mp4")
+    print("  ✅ DONE  [ 2/40] 2025-10-07_13-05-55.mp4")
+    print("  📦 CACHE [ 3/40] 2025-10-08_09-02-13.mp4")
+    print("  ...")
+    print("\nFinal summary shows:")
+    print("  ✅ Completed 40/40 videos")
+    print("     📦 Loaded from cache: 35")
+    print("     ⚙️  Newly processed: 5")
+    print("     ❌ Errors: 0")
+    print("\nFor single video processing with verbose logs:")
+    
+    verbose_pipeline = TranscriptPipeline(silent=False)  # Default
+    # result = verbose_pipeline.process("video.mp4")
+    
+    print("For custom silent processing (useful for batch jobs):")
+    
+    silent_pipeline = TranscriptPipeline(silent=True)
+    # result = silent_pipeline.process("video.mp4")  # No verbose logs
+    
+    print("Silent mode suppresses step-by-step logs while processing.\n")
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Handover Documentation</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #10b981;
+            --background: #ffffff;
+            --surface: #f8fafc;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--surface);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--background);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h1 {
+            font-size: 1.5rem;
+            padding: 0 2rem 1rem;
+            color: var(--primary-color);
+        }
+
+        .sidebar nav {
+            padding: 0 1rem;
+        }
+
+        .sidebar nav a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            margin-bottom: 0.25rem;
+            transition: all 0.2s;
+        }
+
+        .sidebar nav a:hover {
+            background: var(--surface);
+            color: var(--primary-color);
+        }
+
+        .sidebar nav a.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .sidebar .nav-section {
+            margin-top: 2rem;
+            padding: 0 1rem;
+        }
+
+        .sidebar .nav-section h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            padding: 3rem;
+            max-width: 1400px;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .header .meta {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Search bar */
+        .search-bar {
+            margin-bottom: 2rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab-button {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            margin-bottom: -2px;
+        }
+
+        .tab-button:hover {
+            color: var(--primary-color);
+        }
+
+        .tab-button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Content sections */
+        .section {
+            background: var(--background);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px var(--shadow);
+        }
+
+        .section h2 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section h3 {
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--text);
+        }
+
+        .section h4 {
+            font-size: 1.1rem;
+            margin: 1rem 0 0.5rem;
+            color: var(--text);
+        }
+
+        .section p {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .section ul, .section ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge.primary {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Diagram container */
+        .diagram {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Collapsible sections */
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .collapsible::before {
+            content: '▼';
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+        }
+
+        .collapsible.collapsed::before {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            max-height: none;
+            overflow: visible;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        /* Video controls */
+        .video-controls {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .control-group {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .control-button {
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .control-button:hover {
+            background: #1e40af;
+        }
+
+        .control-button:active {
+            transform: scale(0.98);
+        }
+
+        .date-filter {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        /* Video summary cards */
+        .video-card {
+            background: var(--surface);
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .video-card.hidden {
+            display: none;
+        }
+
+        .video-card-header {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .video-card-header:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .video-card-header::after {
+            content: '▼';
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .video-card-header.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        .video-card-header h4 {
+            color: var(--primary-color);
+            margin: 0;
+            flex: 1;
+        }
+
+        .video-card-header .date {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-left: 1rem;
+        }
+
+        .video-card-content {
+            padding: 0 1.5rem 1.5rem;
+            max-height: none;
+            overflow: visible;
+            transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+            opacity: 1;
+        }
+
+        .video-card-content.collapsed {
+            max-height: 0;
+            padding: 0;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        /* Print styles */
+        @media print {
+            .sidebar {
+                display: none;
+            }
+
+            .search-bar {
+                display: none;
+            }
+
+            .tabs {
+                display: none;
+            }
+
+            .tab-content {
+                display: block !important;
+            }
+
+            .section {
+                page-break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid var(--border);
+            }
+
+            .collapsible-content {
+                max-height: none !important;
+                opacity: 1 !important;
+                overflow: visible !important;
+            }
+
+            .video-controls {
+                display: none !important;
+            }
+
+            .video-card-content {
+                padding: 0 1.5rem 1.5rem !important;
+            }
+
+            .video-card-header::after {
+                display: none;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+        }
+
+        /* Key-value pairs */
+        .kv-list {
+            display: grid;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .kv-item {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .kv-key {
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 150px;
+        }
+
+        .kv-value {
+            flex: 1;
+            color: var(--text);
+        }
+
+        /* Icons using emoji */
+        .icon {
+            font-style: normal;
+        }
+
+        /* Search highlight */
+        .search-highlight {
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+            background: rgba(37, 99, 235, 0.05) !important;
+        }
+        
+        /* Search dimmed */
+        .search-dimmed {
+            opacity: 0.2 !important;
+            filter: grayscale(0.5);
+        }
+        
+        /* Highlighted search term */
+        mark.search-term {
+            background: #fbbf24;
+            color: #000;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+        }
+
+        /* Search input focus */
+        .search-bar input:focus {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h1>📋 Handover</h1>
+            <nav>
+                <a href="#overview" class="nav-link active">Overview</a>
+                <a href="#executive" class="nav-link">Executive Summary</a>
+                <a href="#technical" class="nav-link">Technical Summary</a>
+                <a href="#diagrams" class="nav-link">Visual Diagrams</a>
+                <div class="nav-section">
+                    <h3>Details</h3>
+                    <a href="#people" class="nav-link">Team & Roles</a>
+                    <a href="#components" class="nav-link">Components</a>
+                    <a href="#timeline" class="nav-link">Timeline</a>
+                    <a href="#videos" class="nav-link">Video Summaries</a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1>Project Handover Documentation</h1>
+                <div class="meta">
+                    Generated on <strong>{{ generation_date }}</strong> | 
+                    Based on <strong>{{ video_count }}</strong> video(s)
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search documentation...">
+                <div id="searchResults" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary); display: none;">
+                    <span id="searchResultsText"></span>
+                </div>
+            </div>
+
+            <!-- Tabs for Executive/Technical Views -->
+            <div class="tabs">
+                <button class="tab-button active" data-tab="executive">Executive View</button>
+                <button class="tab-button" data-tab="technical">Technical View</button>
+                <button class="tab-button" data-tab="both">Side by Side</button>
+            </div>
+
+            <!-- Executive Tab Content -->
+            <div class="tab-content active" id="executive-tab">
+                <section class="section" id="executive">
+                    <h2><span class="icon">👔</span> Executive Summary</h2>
+                    <div class="content">
+                        {{ executive_summary }}
+                    </div>
+                </section>
+            </div>
+
+            <!-- Technical Tab Content -->
+            <div class="tab-content" id="technical-tab">
+                <section class="section" id="technical">
+                    <h2><span class="icon">⚙️</span> Technical Summary</h2>
+                    <div class="content">
+                        {{ technical_summary }}
+                    </div>
+                </section>
+            </div>
+
+            <!-- Side by Side Tab Content -->
+            <div class="tab-content" id="both-tab">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <section class="section">
+                        <h2><span class="icon">👔</span> Executive Summary</h2>
+                        <div class="content">
+                            {{ executive_summary }}
+                        </div>
+                    </section>
+                    <section class="section">
+                        <h2><span class="icon">⚙️</span> Technical Summary</h2>
+                        <div class="content">
+                            {{ technical_summary }}
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Overview Section (always visible) -->
+            <section class="section" id="overview">
+                <h2><span class="icon">📊</span> Project Overview</h2>
+                <div class="content">
+                    {{ project_overview }}
+                </div>
+                
+                {% if key_themes %}
+                <h3>Key Themes</h3>
+                <div>
+                    {% for theme in key_themes %}
+                    <span class="badge primary">{{ theme }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if technical_stack %}
+                <h3>Technical Stack</h3>
+                <div>
+                    {% for tech in technical_stack %}
+                    <span class="badge success">{{ tech }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </section>
+
+            <!-- Diagrams Section -->
+            {% if diagrams %}
+            <section class="section" id="diagrams">
+                <h2><span class="icon">📈</span> Visual Diagrams</h2>
+                
+                {% if diagrams.timeline %}
+                <h3 class="collapsible">Project Timeline</h3>
+                <div class="collapsible-content">
+                    <div class="diagram">
+                        <pre class="mermaid">{{ diagrams.timeline }}</pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if diagrams.architecture %}
+                <h3 class="collapsible">System Architecture</h3>
+                <div class="collapsible-content">
+                    <div class="diagram">
+                        <pre class="mermaid">{{ diagrams.architecture }}</pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if diagrams.roles %}
+                <h3 class="collapsible">Team & Components</h3>
+                <div class="collapsible-content">
+                    <div class="diagram">
+                        <pre class="mermaid">{{ diagrams.roles }}</pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if diagrams.decisions %}
+                <h3 class="collapsible">Decision Flow</h3>
+                <div class="collapsible-content">
+                    <div class="diagram">
+                        <pre class="mermaid">{{ diagrams.decisions }}</pre>
+                    </div>
+                </div>
+                {% endif %}
+            </section>
+            {% endif %}
+
+            <!-- People Section -->
+            {% if people %}
+            <section class="section" id="people">
+                <h2><span class="icon">👥</span> Team & Stakeholders</h2>
+                <div class="kv-list">
+                    {% for person in people %}
+                    <div class="kv-item">
+                        <div class="kv-key">{{ person.name }}</div>
+                        <div class="kv-value">
+                            {% if person.roles %}
+                            <strong>{{ person.roles | join(', ') }}</strong><br>
+                            {% endif %}
+                            {% if person.components %}
+                            Works on: {{ person.components | join(', ') }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- Components Section -->
+            {% if components %}
+            <section class="section" id="components">
+                <h2><span class="icon">🏗️</span> System Components</h2>
+                {% for component in components %}
+                <div class="video-card">
+                    <h4>{{ component.name }}</h4>
+                    <p>{{ component.description }}</p>
+                    {% if component.technologies %}
+                    <div>
+                        {% for tech in component.technologies %}
+                        <span class="badge success">{{ tech }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if component.relationships %}
+                    <p><em>Relationships: {{ component.relationships | join('; ') }}</em></p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </section>
+            {% endif %}
+
+            <!-- Timeline Section -->
+            {% if timeline_events %}
+            <section class="section" id="timeline">
+                <h2><span class="icon">📅</span> Timeline & Milestones</h2>
+                {% for event in timeline_events %}
+                <div class="video-card">
+                    <h4>
+                        {% if event.date %}
+                        <span class="badge primary">{{ event.date }}</span>
+                        {% endif %}
+                        {{ event.title }}
+                    </h4>
+                    <p>{{ event.description }}</p>
+                    <span class="badge {% if event.event_type == 'decision' %}warning{% elif event.event_type == 'milestone' %}success{% else %}primary{% endif %}">
+                        {{ event.event_type }}
+                    </span>
+                </div>
+                {% endfor %}
+            </section>
+            {% endif %}
+
+            <!-- Video Summaries Section -->
+            {% if video_summaries %}
+            <section class="section" id="videos">
+                <h2 class="collapsible"><span class="icon">🎥</span> Individual Video Summaries ({{ video_summaries|length }})</h2>
+                <div class="collapsible-content">
+                    <!-- Video Controls -->
+                    <div class="video-controls">
+                        <div class="control-group">
+                            <button class="control-button" id="expandAllVideos">Expand All</button>
+                            <button class="control-button" id="collapseAllVideos">Collapse All</button>
+                        </div>
+                        <div class="control-group">
+                            <label for="dateFilter">Filter by date:</label>
+                            <input type="month" id="dateFilter" class="date-filter">
+                            <button class="control-button" id="clearDateFilter">Clear Filter</button>
+                        </div>
+                    </div>
+
+                    <!-- Video Cards -->
+                    {% for video in video_summaries %}
+                    <div class="video-card" data-date="{{ video.date }}">
+                        <div class="video-card-header collapsed">
+                            <h4>{{ video.title }}</h4>
+                            {% if video.date %}
+                            <div class="date">{{ video.date }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="video-card-content collapsed">
+                            {{ video.summary }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </main>
+    </div>
+
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing handover report...');
+            
+            // Initialize Mermaid
+            mermaid.initialize({ 
+                startOnLoad: true,
+                theme: 'default',
+                securityLevel: 'loose'
+            });
+
+            // Tab switching
+            document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.dataset.tab;
+                
+                // Update buttons
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Update content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            });
+        });
+
+        // Collapsible sections (excluding video card headers which have their own handler)
+        document.querySelectorAll('.collapsible:not(.video-card-header)').forEach(header => {
+            header.addEventListener('click', () => {
+                header.classList.toggle('collapsed');
+                const content = header.nextElementSibling;
+                if (content && content.classList.contains('collapsible-content')) {
+                    content.classList.toggle('collapsed');
+                }
+            });
+        });
+
+        // Sidebar navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const target = document.getElementById(targetId);
+                
+                if (target) {
+                    // Update active link
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    
+                    // Scroll to target
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Function to highlight text within an element
+        function highlightText(element, searchTerm) {
+            // Remove existing highlights first
+            removeHighlights(element);
+            
+            if (!searchTerm) return;
+            
+            // Walk through text nodes and highlight matches
+            const walker = document.createTreeWalker(
+                element,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            const nodesToReplace = [];
+            let node;
+            
+            while (node = walker.nextNode()) {
+                // Skip if parent is already a mark tag or is a script/style
+                if (node.parentElement.tagName === 'MARK' || 
+                    node.parentElement.tagName === 'SCRIPT' || 
+                    node.parentElement.tagName === 'STYLE') {
+                    continue;
+                }
+                
+                const text = node.nodeValue;
+                const lowerText = text.toLowerCase();
+                const lowerSearch = searchTerm.toLowerCase();
+                
+                if (lowerText.includes(lowerSearch)) {
+                    nodesToReplace.push(node);
+                }
+            }
+            
+            // Replace text nodes with highlighted versions
+            nodesToReplace.forEach(node => {
+                const text = node.nodeValue;
+                const lowerText = text.toLowerCase();
+                const lowerSearch = searchTerm.toLowerCase();
+                
+                const fragment = document.createDocumentFragment();
+                let lastIndex = 0;
+                let index = lowerText.indexOf(lowerSearch);
+                
+                while (index !== -1) {
+                    // Add text before match
+                    if (index > lastIndex) {
+                        fragment.appendChild(document.createTextNode(text.slice(lastIndex, index)));
+                    }
+                    
+                    // Add highlighted match
+                    const mark = document.createElement('mark');
+                    mark.className = 'search-term';
+                    mark.textContent = text.slice(index, index + searchTerm.length);
+                    fragment.appendChild(mark);
+                    
+                    lastIndex = index + searchTerm.length;
+                    index = lowerText.indexOf(lowerSearch, lastIndex);
+                }
+                
+                // Add remaining text
+                if (lastIndex < text.length) {
+                    fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+                }
+                
+                node.parentNode.replaceChild(fragment, node);
+            });
+        }
+        
+        // Function to remove highlights
+        function removeHighlights(element) {
+            const marks = element.querySelectorAll('mark.search-term');
+            marks.forEach(mark => {
+                const parent = mark.parentNode;
+                parent.replaceChild(document.createTextNode(mark.textContent), mark);
+                parent.normalize(); // Merge adjacent text nodes
+            });
+        }
+        
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        let searchTimeout;
+
+        console.log('Search input element:', searchInput);
+
+        if (searchInput) {
+            console.log('Search functionality initialized');
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    const searchTerm = e.target.value.toLowerCase().trim();
+                    
+                    if (!searchTerm) {
+                        // Remove all text highlights
+                        document.querySelectorAll('.section, .video-card').forEach(el => {
+                            removeHighlights(el);
+                        });
+                        
+                        // Reset all highlighting and dimming
+                        document.querySelectorAll('.section, .video-card').forEach(el => {
+                            el.classList.remove('search-highlight', 'search-dimmed');
+                            el.style.display = '';
+                        });
+                        
+                        // Reset all tab content visibility to default
+                        document.querySelectorAll('.tab-content').forEach(tab => {
+                            tab.classList.remove('active');
+                        });
+                        // Show the currently active tab
+                        const activeButton = document.querySelector('.tab-button.active');
+                        if (activeButton) {
+                            const tabName = activeButton.dataset.tab;
+                            document.getElementById(`${tabName}-tab`)?.classList.add('active');
+                        }
+                        
+                        // Hide search results indicator
+                        const searchResults = document.getElementById('searchResults');
+                        if (searchResults) {
+                            searchResults.style.display = 'none';
+                        }
+                        
+                        return;
+                    }
+
+                    // When searching, show all tab content to display matches
+                    document.querySelectorAll('.tab-content').forEach(tab => {
+                        tab.classList.add('active');
+                    });
+
+                    // Search across all sections
+                    let foundCount = 0;
+                    document.querySelectorAll('.section').forEach(section => {
+                        const text = section.textContent.toLowerCase();
+                        if (text.includes(searchTerm)) {
+                            section.classList.remove('search-dimmed');
+                            section.classList.add('search-highlight');
+                            section.style.display = '';
+                            
+                            // Highlight the actual text
+                            highlightText(section, e.target.value.trim());
+                            
+                            foundCount++;
+                        } else {
+                            section.classList.remove('search-highlight');
+                            section.classList.add('search-dimmed');
+                            removeHighlights(section);
+                        }
+                    });
+                    
+                    // Also search video cards
+                    document.querySelectorAll('.video-card').forEach(card => {
+                        const text = card.textContent.toLowerCase();
+                        if (text.includes(searchTerm)) {
+                            card.classList.remove('search-dimmed');
+                            card.classList.add('search-highlight');
+                            card.style.display = '';
+                            
+                            // Highlight the actual text
+                            highlightText(card, e.target.value.trim());
+                            
+                            // Auto-expand matching video cards
+                            const header = card.querySelector('.video-card-header');
+                            const content = card.querySelector('.video-card-content');
+                            if (header && content) {
+                                header.classList.remove('collapsed');
+                                content.classList.remove('collapsed');
+                            }
+                            
+                            foundCount++;
+                        } else {
+                            card.classList.remove('search-highlight');
+                            card.classList.add('search-dimmed');
+                            removeHighlights(card);
+                        }
+                    });
+                    
+                    console.log(`Search: "${searchTerm}" - Found ${foundCount} matches`);
+                    
+                    // Update search results indicator
+                    const searchResults = document.getElementById('searchResults');
+                    const searchResultsText = document.getElementById('searchResultsText');
+                    if (searchResults && searchResultsText) {
+                        searchResults.style.display = 'block';
+                        if (foundCount === 0) {
+                            searchResultsText.innerHTML = '❌ No matches found';
+                            searchResultsText.style.color = '#ef4444';
+                        } else if (foundCount === 1) {
+                            searchResultsText.innerHTML = '✅ Found 1 match';
+                            searchResultsText.style.color = '#10b981';
+                        } else {
+                            searchResultsText.innerHTML = `✅ Found ${foundCount} matches`;
+                            searchResultsText.style.color = '#10b981';
+                        }
+                    }
+                    
+                    // Scroll to first match
+                    if (foundCount > 0) {
+                        const firstMark = document.querySelector('mark.search-term');
+                        if (firstMark) {
+                            setTimeout(() => {
+                                firstMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        }
+                    }
+                }, 300);
+            });
+        } else {
+            console.error('Search input element not found');
+        }
+
+        // Video card collapsible functionality
+        document.querySelectorAll('.video-card-header').forEach(header => {
+            header.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent event bubbling
+                header.classList.toggle('collapsed');
+                const content = header.nextElementSibling;
+                if (content && content.classList.contains('video-card-content')) {
+                    content.classList.toggle('collapsed');
+                }
+            });
+        });
+
+        // Expand All Videos button
+        const expandAllBtn = document.getElementById('expandAllVideos');
+        if (expandAllBtn) {
+            expandAllBtn.addEventListener('click', () => {
+                document.querySelectorAll('.video-card-header.collapsed').forEach(header => {
+                    header.classList.remove('collapsed');
+                    const content = header.nextElementSibling;
+                    if (content && content.classList.contains('video-card-content')) {
+                        content.classList.remove('collapsed');
+                    }
+                });
+            });
+        }
+
+        // Collapse All Videos button
+        const collapseAllBtn = document.getElementById('collapseAllVideos');
+        if (collapseAllBtn) {
+            collapseAllBtn.addEventListener('click', () => {
+                document.querySelectorAll('.video-card-header:not(.collapsed)').forEach(header => {
+                    header.classList.add('collapsed');
+                    const content = header.nextElementSibling;
+                    if (content && content.classList.contains('video-card-content')) {
+                        content.classList.add('collapsed');
+                    }
+                });
+            });
+        }
+
+        // Date filter functionality
+        const dateFilter = document.getElementById('dateFilter');
+        if (dateFilter) {
+            dateFilter.addEventListener('change', (e) => {
+                const selectedMonth = e.target.value; // Format: YYYY-MM
+                
+                if (!selectedMonth) {
+                    // Show all videos
+                    document.querySelectorAll('.video-card').forEach(card => {
+                        card.classList.remove('hidden');
+                    });
+                    return;
+                }
+
+                const [year, month] = selectedMonth.split('-');
+                let visibleCount = 0;
+
+                document.querySelectorAll('.video-card').forEach(card => {
+                    const cardDate = card.getAttribute('data-date');
+                    if (!cardDate) {
+                        card.classList.add('hidden');
+                        return;
+                    }
+
+                    // Parse the date (format: "October 27, 2025")
+                    const date = new Date(cardDate);
+                    const cardYear = date.getFullYear();
+                    const cardMonth = String(date.getMonth() + 1).padStart(2, '0');
+
+                    if (cardYear == year && cardMonth == month) {
+                        card.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+
+                console.log(`Date filter: ${selectedMonth} - Showing ${visibleCount} videos`);
+            });
+        }
+
+        // Clear date filter button
+        const clearDateFilterBtn = document.getElementById('clearDateFilter');
+        if (clearDateFilterBtn) {
+            clearDateFilterBtn.addEventListener('click', () => {
+                if (dateFilter) {
+                    dateFilter.value = '';
+                    // Trigger change event to show all videos
+                    dateFilter.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+
+        // Verify all key elements
+        console.log('=== Element Check ===');
+        console.log('Search input:', document.getElementById('searchInput') ? 'Found' : 'NOT FOUND');
+        console.log('Tabs:', document.querySelectorAll('.tab-button').length);
+        console.log('Sections:', document.querySelectorAll('.section').length);
+        console.log('Video cards:', document.querySelectorAll('.video-card').length);
+        console.log('Video headers:', document.querySelectorAll('.video-card-header').length);
+        console.log('Expand All button:', document.getElementById('expandAllVideos') ? 'Found' : 'NOT FOUND');
+        console.log('Date filter:', document.getElementById('dateFilter') ? 'Found' : 'NOT FOUND');
+        console.log('===================');
+        console.log('Handover report initialized successfully!');
+        }); // End DOMContentLoaded
+    </script>
+</body>
+</html>
+

@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     # Pipeline Configuration
     output_dir: Path = Path("output")
     prompts_file: Path = Path("prompts.yaml")
+    
+    # Handover Configuration
+    handover_output_file: str = "project_handover.html"
+    include_individual_summaries: bool = True
+    max_parallel_videos: int = 8  # Maximum number of videos to process in parallel
 
     def __init__(self, **kwargs):
         """Initialize settings and create output directory."""
