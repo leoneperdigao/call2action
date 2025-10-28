@@ -143,3 +143,215 @@ action_items:
     - Format: Just the action items, one per line, no numbering or bullets
 
     ACTION ITEMS:
+
+# Prompt for analyzing project context across multiple videos
+project_analysis:
+  template: |
+    You are analyzing a collection of meeting summaries to understand the overall project context for a comprehensive handover document.
+    
+    Below are summaries from multiple meetings/videos:
+    
+    {summaries}
+    
+    Based on these summaries, provide a comprehensive analysis in the following JSON format:
+    
+    {{
+      "project_overview": "A 2-3 paragraph overview of what this project is about, its goals, and current status",
+      "key_themes": ["theme1", "theme2", ...],
+      "decisions": ["decision1", "decision2", ...],
+      "risks": ["risk1", "risk2", ...],
+      "open_questions": ["question1", "question2", ...],
+      "technical_stack": ["tech1", "tech2", ...]
+    }}
+    
+    Be thorough and extract all relevant information. Focus on:
+    - What problem is being solved
+    - Main technical and business themes
+    - Key decisions that have been made
+    - Risks or concerns identified
+    - Unresolved questions
+    - Technologies and tools mentioned
+    
+    RESPOND ONLY WITH VALID JSON:
+
+# Prompt for extracting technical components and architecture
+component_extraction:
+  template: |
+    You are extracting technical components and system architecture from meeting summaries for a project handover document.
+    
+    Meeting summaries:
+    {summaries}
+    
+    Identify all technical components, systems, modules, or services discussed. For each component, provide:
+    - Name
+    - Brief description of what it does
+    - Related technologies
+    - How it relates to other components
+    
+    Respond in JSON format:
+    
+    {{
+      "components": [
+        {{
+          "name": "Component Name",
+          "description": "What this component does",
+          "technologies": ["tech1", "tech2"],
+          "relationships": ["relates to ComponentX", "integrates with ServiceY"]
+        }}
+      ]
+    }}
+    
+    RESPOND ONLY WITH VALID JSON:
+
+# Prompt for extracting people and their roles
+people_roles_extraction:
+  template: |
+    You are identifying people and their roles from meeting summaries for a project handover document.
+    
+    Meeting summaries:
+    {summaries}
+    
+    Identify all people mentioned and extract:
+    - Their name
+    - Their role(s) or responsibilities
+    - What components or areas they work on
+    
+    Respond in JSON format:
+    
+    {{
+      "people": [
+        {{
+          "name": "Person Name",
+          "roles": ["role1", "role2"],
+          "components": ["component1", "component2"]
+        }}
+      ]
+    }}
+    
+    RESPOND ONLY WITH VALID JSON:
+
+# Prompt for extracting timeline events
+timeline_extraction:
+  template: |
+    You are extracting key timeline events, milestones, and decisions from meeting summaries.
+    
+    Meeting summaries with dates:
+    {summaries_with_dates}
+    
+    Extract significant events in chronological order. For each event:
+    - Title (brief, 3-7 words)
+    - Description
+    - Type: milestone, decision, discussion, or issue
+    
+    Respond in JSON format:
+    
+    {{
+      "events": [
+        {{
+          "title": "Brief event title",
+          "description": "What happened",
+          "type": "milestone/decision/discussion/issue",
+          "video_date": "YYYY-MM-DD or null"
+        }}
+      ]
+    }}
+    
+    RESPOND ONLY WITH VALID JSON:
+
+# Prompt for generating executive-focused handover summary
+executive_summary:
+  template: |
+    You are creating an EXECUTIVE-FOCUSED project handover summary for business stakeholders.
+    
+    Project Context:
+    {project_context}
+    
+    Create a concise, business-oriented handover document (2-3 pages when printed) that covers:
+    
+    1. **PROJECT OVERVIEW**
+       - What is this project about?
+       - What business problem does it solve?
+       - Current status
+    
+    2. **KEY OUTCOMES & DECISIONS**
+       - Major decisions made
+       - Business impact
+       - ROI or value delivered
+    
+    3. **CURRENT STATUS & NEXT STEPS**
+       - Where are we now?
+       - What needs to happen next?
+       - Priority actions
+    
+    4. **RISKS & CONCERNS**
+       - Known risks
+       - Mitigation strategies
+       - Areas needing attention
+    
+    5. **TEAM & STAKEHOLDERS**
+       - Key people involved
+       - Their roles and responsibilities
+    
+    GUIDELINES:
+    - Use business-friendly language (minimal jargon)
+    - Focus on outcomes, not implementation details
+    - Be concise but comprehensive
+    - Highlight business value and ROI
+    - Structure with clear headings
+    
+    EXECUTIVE HANDOVER SUMMARY:
+
+# Prompt for generating technical-focused handover summary
+technical_summary:
+  template: |
+    You are creating a TECHNICAL-FOCUSED project handover summary for engineers and technical staff.
+    
+    Project Context:
+    {project_context}
+    
+    Create a comprehensive technical handover document (5-10 pages when printed) that covers:
+    
+    1. **TECHNICAL OVERVIEW**
+       - System architecture
+       - Technology stack
+       - Key components and their interactions
+    
+    2. **SYSTEM ARCHITECTURE**
+       - Major components/services
+       - Data flow
+       - Integration points
+       - Infrastructure
+    
+    3. **TECHNICAL DECISIONS**
+       - Architectural decisions made
+       - Design patterns used
+       - Trade-offs and rationale
+    
+    4. **IMPLEMENTATION DETAILS**
+       - Key algorithms or approaches
+       - Important code/configuration locations
+       - Development workflow
+    
+    5. **TECHNICAL DEBT & CHALLENGES**
+       - Known issues or limitations
+       - Areas needing refactoring
+       - Performance considerations
+    
+    6. **DEVELOPMENT ROADMAP**
+       - Planned features or improvements
+       - Technical prerequisites
+       - Migration or upgrade paths
+    
+    7. **OPERATIONS & MAINTENANCE**
+       - Deployment process
+       - Monitoring and logging
+       - Troubleshooting common issues
+    
+    GUIDELINES:
+    - Use technical terminology appropriately
+    - Include specific details (file paths, commands, configurations)
+    - Be thorough and comprehensive
+    - Provide context for technical decisions
+    - Structure with clear headings and subsections
+    
+    TECHNICAL HANDOVER SUMMARY:

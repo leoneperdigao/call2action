@@ -1,8 +1,9 @@
 """Data models for the Call2Action pipeline."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 
 @dataclass
@@ -48,7 +49,7 @@ class TranscriptResult:
         print(f"✅ Results saved to {output_dir}/")
 
     @staticmethod
-    def load_transcript(audio_file: Path, output_dir: Path) -> tuple[str, List['TranscriptSegment']] | None:
+    def load_transcript(audio_file: Path, output_dir: Path) -> Optional[Tuple[str, List['TranscriptSegment']]]:
         """Load existing transcript and segments from files.
         
         Args:
@@ -113,42 +114,104 @@ class TranscriptResult:
         print(f"💾 Transcript saved to {output_dir}/")
 
     @staticmethod
-    def load_summary(audio_file: Path, output_dir: Path) -> tuple[str, List[str]] | None:
-        """Load existing summary and call-to-action from file.
+    def load_summary(audio_file: Path, output_dir: Path) -> Optional[Tuple[str, List[str]]]:
+        """Load existing summary from file.
         
         Args:
             audio_file: Original audio file path
             output_dir: Directory containing saved summaries
             
         Returns:
-            Tuple of (summary text, list of actions) or None if not found
+            Tuple of (summary text, empty list) or None if not found
         """
         summary_file = output_dir / f"{audio_file.stem}_summary.txt"
         
         if not summary_file.exists():
             return None
         
-        with open(summary_file, "r", encoding="utf-8") as f:
-            content = f.read()
-        
-        # Parse the summary file
         try:
-            parts = content.split("=== CALL TO ACTION ===")
-            if len(parts) != 2:
+            with open(summary_file, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+            
+            if not content:
                 return None
             
-            summary_part = parts[0].replace("=== SUMMARY ===", "").strip()
-            actions_part = parts[1].strip()
+            # Current format: just the summary text (no call-to-action section)
+            # Return summary with empty actions list
+            return content, []
             
-            # Parse actions
-            actions = []
-            for line in actions_part.split("\n"):
-                line = line.strip()
-                if line and not line.startswith("==="):
-                    # Remove numbering (e.g., "1. ", "2. ")
-                    action = line.split(". ", 1)[-1] if ". " in line else line
-                    actions.append(action)
-            
-            return summary_part, actions
         except Exception:
             return None
+
+
+@dataclass
+class VideoSummary:
+    """Summary information for a single processed video."""
+    
+    video_file: Path
+    date: Optional[datetime]
+    transcript: str
+    summary: str
+    key_themes: List[str] = field(default_factory=list)
+    duration_seconds: Optional[float] = None
+    error: Optional[str] = None
+
+
+@dataclass
+class PersonRole:
+    """Information about a person and their role in the project."""
+    
+    name: str
+    roles: List[str] = field(default_factory=list)
+    components: List[str] = field(default_factory=list)
+    mentions: int = 0
+
+
+@dataclass
+class ProjectComponent:
+    """A technical component or system in the project."""
+    
+    name: str
+    description: str
+    related_people: List[str] = field(default_factory=list)
+    technologies: List[str] = field(default_factory=list)
+    relationships: List[str] = field(default_factory=list)
+
+
+@dataclass
+class TimelineEvent:
+    """A significant event or decision in the project timeline."""
+    
+    date: Optional[datetime]
+    title: str
+    description: str
+    event_type: str  # milestone, decision, discussion, issue
+    related_videos: List[str] = field(default_factory=list)
+
+
+@dataclass
+class ProjectContext:
+    """Aggregated analysis of project context from multiple videos."""
+    
+    project_overview: str
+    key_themes: List[str] = field(default_factory=list)
+    people: List[PersonRole] = field(default_factory=list)
+    components: List[ProjectComponent] = field(default_factory=list)
+    timeline: List[TimelineEvent] = field(default_factory=list)
+    decisions: List[str] = field(default_factory=list)
+    risks: List[str] = field(default_factory=list)
+    open_questions: List[str] = field(default_factory=list)
+    technical_stack: List[str] = field(default_factory=list)
+
+
+@dataclass
+class HandoverReport:
+    """Complete handover documentation report."""
+    
+    project_context: ProjectContext
+    executive_summary: str
+    technical_summary: str
+    video_summaries: List[VideoSummary]
+    diagrams: Dict[str, str] = field(default_factory=dict)  # diagram_name -> mermaid_code
+    generation_date: datetime = field(default_factory=datetime.now)
+    metadata: Dict[str, any] = field(default_factory=dict)
