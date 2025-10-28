@@ -495,6 +495,22 @@
         .search-highlight {
             border-left: 4px solid var(--primary-color);
             box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+            background: rgba(37, 99, 235, 0.05) !important;
+        }
+        
+        /* Search dimmed */
+        .search-dimmed {
+            opacity: 0.2 !important;
+            filter: grayscale(0.5);
+        }
+        
+        /* Highlighted search term */
+        mark.search-term {
+            background: #fbbf24;
+            color: #000;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
         }
 
         /* Search input focus */
@@ -536,6 +552,9 @@
             <!-- Search -->
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="Search documentation...">
+                <div id="searchResults" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary); display: none;">
+                    <span id="searchResultsText"></span>
+                </div>
             </div>
 
             <!-- Tabs for Executive/Technical Views -->
@@ -757,15 +776,19 @@
     </div>
 
     <script>
-        // Initialize Mermaid
-        mermaid.initialize({ 
-            startOnLoad: true,
-            theme: 'default',
-            securityLevel: 'loose'
-        });
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing handover report...');
+            
+            // Initialize Mermaid
+            mermaid.initialize({ 
+                startOnLoad: true,
+                theme: 'default',
+                securityLevel: 'loose'
+            });
 
-        // Tab switching
-        document.querySelectorAll('.tab-button').forEach(button => {
+            // Tab switching
+            document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => {
                 const tabName = button.dataset.tab;
                 
@@ -810,41 +833,153 @@
             });
         });
 
+        // Function to highlight text within an element
+        function highlightText(element, searchTerm) {
+            // Remove existing highlights first
+            removeHighlights(element);
+            
+            if (!searchTerm) return;
+            
+            // Walk through text nodes and highlight matches
+            const walker = document.createTreeWalker(
+                element,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            const nodesToReplace = [];
+            let node;
+            
+            while (node = walker.nextNode()) {
+                // Skip if parent is already a mark tag or is a script/style
+                if (node.parentElement.tagName === 'MARK' || 
+                    node.parentElement.tagName === 'SCRIPT' || 
+                    node.parentElement.tagName === 'STYLE') {
+                    continue;
+                }
+                
+                const text = node.nodeValue;
+                const lowerText = text.toLowerCase();
+                const lowerSearch = searchTerm.toLowerCase();
+                
+                if (lowerText.includes(lowerSearch)) {
+                    nodesToReplace.push(node);
+                }
+            }
+            
+            // Replace text nodes with highlighted versions
+            nodesToReplace.forEach(node => {
+                const text = node.nodeValue;
+                const lowerText = text.toLowerCase();
+                const lowerSearch = searchTerm.toLowerCase();
+                
+                const fragment = document.createDocumentFragment();
+                let lastIndex = 0;
+                let index = lowerText.indexOf(lowerSearch);
+                
+                while (index !== -1) {
+                    // Add text before match
+                    if (index > lastIndex) {
+                        fragment.appendChild(document.createTextNode(text.slice(lastIndex, index)));
+                    }
+                    
+                    // Add highlighted match
+                    const mark = document.createElement('mark');
+                    mark.className = 'search-term';
+                    mark.textContent = text.slice(index, index + searchTerm.length);
+                    fragment.appendChild(mark);
+                    
+                    lastIndex = index + searchTerm.length;
+                    index = lowerText.indexOf(lowerSearch, lastIndex);
+                }
+                
+                // Add remaining text
+                if (lastIndex < text.length) {
+                    fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+                }
+                
+                node.parentNode.replaceChild(fragment, node);
+            });
+        }
+        
+        // Function to remove highlights
+        function removeHighlights(element) {
+            const marks = element.querySelectorAll('mark.search-term');
+            marks.forEach(mark => {
+                const parent = mark.parentNode;
+                parent.replaceChild(document.createTextNode(mark.textContent), mark);
+                parent.normalize(); // Merge adjacent text nodes
+            });
+        }
+        
         // Search functionality
         const searchInput = document.getElementById('searchInput');
         let searchTimeout;
 
+        console.log('Search input element:', searchInput);
+
         if (searchInput) {
+            console.log('Search functionality initialized');
             searchInput.addEventListener('input', (e) => {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
                     const searchTerm = e.target.value.toLowerCase().trim();
                     
                     if (!searchTerm) {
-                        // Reset highlighting
-                        document.querySelectorAll('.section').forEach(section => {
-                            section.style.opacity = '1';
-                            section.style.display = '';
+                        // Remove all text highlights
+                        document.querySelectorAll('.section, .video-card').forEach(el => {
+                            removeHighlights(el);
                         });
-                        // Remove any search highlights
-                        document.querySelectorAll('.search-highlight').forEach(el => {
-                            el.classList.remove('search-highlight');
+                        
+                        // Reset all highlighting and dimming
+                        document.querySelectorAll('.section, .video-card').forEach(el => {
+                            el.classList.remove('search-highlight', 'search-dimmed');
+                            el.style.display = '';
                         });
+                        
+                        // Reset all tab content visibility to default
+                        document.querySelectorAll('.tab-content').forEach(tab => {
+                            tab.classList.remove('active');
+                        });
+                        // Show the currently active tab
+                        const activeButton = document.querySelector('.tab-button.active');
+                        if (activeButton) {
+                            const tabName = activeButton.dataset.tab;
+                            document.getElementById(`${tabName}-tab`)?.classList.add('active');
+                        }
+                        
+                        // Hide search results indicator
+                        const searchResults = document.getElementById('searchResults');
+                        if (searchResults) {
+                            searchResults.style.display = 'none';
+                        }
+                        
                         return;
                     }
 
-                    // Search across all sections (including hidden tabs)
+                    // When searching, show all tab content to display matches
+                    document.querySelectorAll('.tab-content').forEach(tab => {
+                        tab.classList.add('active');
+                    });
+
+                    // Search across all sections
                     let foundCount = 0;
                     document.querySelectorAll('.section').forEach(section => {
                         const text = section.textContent.toLowerCase();
                         if (text.includes(searchTerm)) {
-                            section.style.opacity = '1';
-                            section.style.display = '';
+                            section.classList.remove('search-dimmed');
                             section.classList.add('search-highlight');
+                            section.style.display = '';
+                            
+                            // Highlight the actual text
+                            highlightText(section, e.target.value.trim());
+                            
                             foundCount++;
                         } else {
-                            section.style.opacity = '0.3';
                             section.classList.remove('search-highlight');
+                            section.classList.add('search-dimmed');
+                            removeHighlights(section);
                         }
                     });
                     
@@ -852,15 +987,57 @@
                     document.querySelectorAll('.video-card').forEach(card => {
                         const text = card.textContent.toLowerCase();
                         if (text.includes(searchTerm)) {
-                            card.style.opacity = '1';
+                            card.classList.remove('search-dimmed');
+                            card.classList.add('search-highlight');
                             card.style.display = '';
+                            
+                            // Highlight the actual text
+                            highlightText(card, e.target.value.trim());
+                            
+                            // Auto-expand matching video cards
+                            const header = card.querySelector('.video-card-header');
+                            const content = card.querySelector('.video-card-content');
+                            if (header && content) {
+                                header.classList.remove('collapsed');
+                                content.classList.remove('collapsed');
+                            }
+                            
                             foundCount++;
                         } else {
-                            card.style.opacity = '0.3';
+                            card.classList.remove('search-highlight');
+                            card.classList.add('search-dimmed');
+                            removeHighlights(card);
                         }
                     });
                     
                     console.log(`Search: "${searchTerm}" - Found ${foundCount} matches`);
+                    
+                    // Update search results indicator
+                    const searchResults = document.getElementById('searchResults');
+                    const searchResultsText = document.getElementById('searchResultsText');
+                    if (searchResults && searchResultsText) {
+                        searchResults.style.display = 'block';
+                        if (foundCount === 0) {
+                            searchResultsText.innerHTML = '❌ No matches found';
+                            searchResultsText.style.color = '#ef4444';
+                        } else if (foundCount === 1) {
+                            searchResultsText.innerHTML = '✅ Found 1 match';
+                            searchResultsText.style.color = '#10b981';
+                        } else {
+                            searchResultsText.innerHTML = `✅ Found ${foundCount} matches`;
+                            searchResultsText.style.color = '#10b981';
+                        }
+                    }
+                    
+                    // Scroll to first match
+                    if (foundCount > 0) {
+                        const firstMark = document.querySelector('mark.search-term');
+                        if (firstMark) {
+                            setTimeout(() => {
+                                firstMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        }
+                    }
                 }, 300);
             });
         } else {
@@ -959,6 +1136,19 @@
                 }
             });
         }
+
+        // Verify all key elements
+        console.log('=== Element Check ===');
+        console.log('Search input:', document.getElementById('searchInput') ? 'Found' : 'NOT FOUND');
+        console.log('Tabs:', document.querySelectorAll('.tab-button').length);
+        console.log('Sections:', document.querySelectorAll('.section').length);
+        console.log('Video cards:', document.querySelectorAll('.video-card').length);
+        console.log('Video headers:', document.querySelectorAll('.video-card-header').length);
+        console.log('Expand All button:', document.getElementById('expandAllVideos') ? 'Found' : 'NOT FOUND');
+        console.log('Date filter:', document.getElementById('dateFilter') ? 'Found' : 'NOT FOUND');
+        console.log('===================');
+        console.log('Handover report initialized successfully!');
+        }); // End DOMContentLoaded
     </script>
 </body>
 </html>

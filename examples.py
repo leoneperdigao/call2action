@@ -131,6 +131,32 @@ def main():
     print("  - Tweak prompts and regenerate reports quickly")
     print("  - Add new videos without reprocessing old ones")
     print("  - Experiment with different report formats efficiently\n")
+    
+    # Example 9: Clean Logging with Silent Mode
+    print("=== Example 9: Clean Parallel Processing Logs ===\n")
+    
+    print("The handover pipeline uses clean, organized logging:")
+    print("\nWhen processing multiple videos in parallel, you'll see:")
+    print("  📦 CACHE [ 1/40] 2025-10-06_10-35-48.mp4")
+    print("  ✅ DONE  [ 2/40] 2025-10-07_13-05-55.mp4")
+    print("  📦 CACHE [ 3/40] 2025-10-08_09-02-13.mp4")
+    print("  ...")
+    print("\nFinal summary shows:")
+    print("  ✅ Completed 40/40 videos")
+    print("     📦 Loaded from cache: 35")
+    print("     ⚙️  Newly processed: 5")
+    print("     ❌ Errors: 0")
+    print("\nFor single video processing with verbose logs:")
+    
+    verbose_pipeline = TranscriptPipeline(silent=False)  # Default
+    # result = verbose_pipeline.process("video.mp4")
+    
+    print("For custom silent processing (useful for batch jobs):")
+    
+    silent_pipeline = TranscriptPipeline(silent=True)
+    # result = silent_pipeline.process("video.mp4")  # No verbose logs
+    
+    print("Silent mode suppresses step-by-step logs while processing.\n")
 
 if __name__ == "__main__":
     main()

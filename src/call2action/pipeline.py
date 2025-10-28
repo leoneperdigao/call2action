@@ -11,16 +11,18 @@ from call2action.summarizer import Summarizer
 class TranscriptPipeline:
     """Orchestrates the complete transcript-to-summary-to-action pipeline."""
 
-    def __init__(self, settings: Settings = None):
+    def __init__(self, settings: Settings = None, silent: bool = False):
         """
         Initialize the pipeline with all components.
 
         Args:
             settings: Optional Settings object. If not provided, loads from environment.
+            silent: If True, suppress verbose logging (useful for parallel processing)
         """
         self.settings = settings or Settings()
         self.transcriber = Transcriber(self.settings)
         self.summarizer = Summarizer(self.settings)
+        self.silent = silent
 
     def process(self, audio_file: str | Path, save_output: bool = True, force_rerun: bool = False) -> TranscriptResult:
         """
@@ -36,12 +38,14 @@ class TranscriptPipeline:
         """
         audio_path = Path(audio_file)
         
-        print(f"\n{'='*60}")
-        print(f"🚀 Starting pipeline for: {audio_path.name}")
-        print(f"{'='*60}\n")
+        if not self.silent:
+            print(f"\n{'='*60}")
+            print(f"🚀 Starting pipeline for: {audio_path.name}")
+            print(f"{'='*60}\n")
 
         # Step 1: Transcribe audio (or load from cache)
-        print("📍 Step 1: Transcription")
+        if not self.silent:
+            print("📍 Step 1: Transcription")
         
         # Try to load existing transcript if not forcing re-run
         transcript = None
@@ -50,22 +54,26 @@ class TranscriptPipeline:
             cached = TranscriptResult.load_transcript(audio_path, self.settings.output_dir)
             if cached:
                 transcript, segments = cached
-                print(f"✅ Found existing transcription (skipping Whisper)")
-                print(f"   - {len(segments)} segments loaded from cache")
-                print(f"Transcript preview: {transcript[:200]}...\n")
+                if not self.silent:
+                    print(f"✅ Found existing transcription (skipping Whisper)")
+                    print(f"   - {len(segments)} segments loaded from cache")
+                    print(f"Transcript preview: {transcript[:200]}...\n")
         
         # If no cache or force_rerun, transcribe
         if transcript is None:
             transcript, segments = self.transcriber.transcribe(audio_path)
-            print(f"Transcript preview: {transcript[:200]}...\n")
+            if not self.silent:
+                print(f"Transcript preview: {transcript[:200]}...\n")
             
             # Save transcript immediately to avoid losing progress
             if save_output:
                 TranscriptResult.save_transcript_only(audio_path, transcript, segments, self.settings.output_dir)
-                print()
+                if not self.silent:
+                    print()
 
         # Step 2: Generate summary (or load from cache)
-        print("📍 Step 2: Summarization")
+        if not self.silent:
+            print("📍 Step 2: Summarization")
         
         summary = None
         call_to_action = []  # Empty list - no longer generating call-to-action
@@ -75,13 +83,15 @@ class TranscriptPipeline:
             cached_summary = TranscriptResult.load_summary(audio_path, self.settings.output_dir)
             if cached_summary:
                 summary, call_to_action = cached_summary
-                print(f"✅ Found existing summary (skipping OpenAI)")
-                print(f"Summary preview: {summary[:200]}...\n")
+                if not self.silent:
+                    print(f"✅ Found existing summary (skipping OpenAI)")
+                    print(f"Summary preview: {summary[:200]}...\n")
         
         # If no cached summary, generate it
         if summary is None:
             summary = self.summarizer.generate_summary(transcript)
-            print(f"Summary preview: {summary[:200]}...\n")
+            if not self.silent:
+                print(f"Summary preview: {summary[:200]}...\n")
 
         # Create result object
         result = TranscriptResult(
@@ -100,10 +110,12 @@ class TranscriptPipeline:
         if save_output:
             # Save the complete result (including summary and actions)
             result.save(self.settings.output_dir)
-            print()
+            if not self.silent:
+                print()
 
-        print(f"{'='*60}")
-        print("✅ Pipeline completed successfully!")
-        print(f"{'='*60}\n")
+        if not self.silent:
+            print(f"{'='*60}")
+            print("✅ Pipeline completed successfully!")
+            print(f"{'='*60}\n")
 
         return result

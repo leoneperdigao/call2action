@@ -14,7 +14,7 @@ from call2action.models import HandoverReport, ProjectContext, VideoSummary
 from call2action.pipeline import TranscriptPipeline
 
 
-def _process_single_video(video_file: Path, settings: Settings, force_rerun: bool) -> VideoSummary:
+def _process_single_video(video_file: Path, settings: Settings, force_rerun: bool, silent: bool = True) -> VideoSummary:
     """
     Process a single video file (designed to be called in parallel).
     
@@ -24,6 +24,7 @@ def _process_single_video(video_file: Path, settings: Settings, force_rerun: boo
         video_file: Path to video file
         settings: Application settings
         force_rerun: Whether to force re-processing
+        silent: If True, suppress verbose logging
         
     Returns:
         VideoSummary object
@@ -36,7 +37,7 @@ def _process_single_video(video_file: Path, settings: Settings, force_rerun: boo
         if not force_rerun:
             from call2action.models import TranscriptResult
             
-            # Try to load existing transcript and summary
+            # Try to load existing transcript and summary (silently)
             cached_transcript = TranscriptResult.load_transcript(video_file, settings.output_dir)
             cached_summary = TranscriptResult.load_summary(video_file, settings.output_dir)
             
@@ -45,10 +46,7 @@ def _process_single_video(video_file: Path, settings: Settings, force_rerun: boo
                 summary, call_to_action = cached_summary
                 
                 # Verify summary is not empty
-                if not summary or not summary.strip():
-                    # Fall through to reprocess
-                    pass
-                else:
+                if summary and summary.strip():
                     # Create VideoSummary from cached data
                     video_summary = VideoSummary(
                         video_file=video_file,
@@ -60,11 +58,11 @@ def _process_single_video(video_file: Path, settings: Settings, force_rerun: boo
                         error=None,
                     )
                     
-                    print(f"📦 Loaded from cache: {video_file.name}")
+                    # Return without printing (main thread will handle progress)
                     return video_summary
         
-        # No cache or force_rerun - process through pipeline
-        pipeline = TranscriptPipeline(settings=settings)
+        # No cache or force_rerun - process through pipeline with silent mode
+        pipeline = TranscriptPipeline(settings=settings, silent=silent)
         
         # Process video
         result = pipeline.process(
@@ -85,9 +83,7 @@ def _process_single_video(video_file: Path, settings: Settings, force_rerun: boo
         return video_summary
         
     except Exception as e:
-        print(f"❌ Error processing {video_file.name}: {e}")
-        
-        # Create error video summary
+        # Create error video summary (don't print, let main thread handle it)
         video_summary = VideoSummary(
             video_file=video_file,
             date=_extract_date_from_filename(video_file.name),
@@ -314,13 +310,25 @@ class HandoverPipeline:
         
         print(f"\n🚀 Processing {total_videos} videos in parallel (max {self.settings.max_parallel_videos} at a time)...")
         if not force_rerun:
-            print(f"💡 Using cached results where available (use --force-rerun to reprocess all)")
+            print(f"💡 Using cached results where available")
+        print()
         
-        # Use ProcessPoolExecutor for parallel processing
+        # Track which videos were processed vs cached
+        video_cache_status = {}  # video_file -> was_cached (bool)
+        
+        # Pre-check cache for all videos (if not force_rerun)
+        if not force_rerun:
+            from call2action.models import TranscriptResult
+            for video_file in video_files:
+                cached_transcript = TranscriptResult.load_transcript(video_file, self.settings.output_dir)
+                cached_summary = TranscriptResult.load_summary(video_file, self.settings.output_dir)
+                video_cache_status[video_file] = bool(cached_transcript and cached_summary and cached_summary[0])
+        
+        # Use ProcessPoolExecutor for parallel processing with silent mode
         with ProcessPoolExecutor(max_workers=self.settings.max_parallel_videos) as executor:
-            # Submit all tasks
+            # Submit all tasks with silent=True
             future_to_video = {
-                executor.submit(_process_single_video, video_file, self.settings, force_rerun): video_file
+                executor.submit(_process_single_video, video_file, self.settings, force_rerun, silent=True): video_file
                 for video_file in video_files
             }
             
@@ -328,6 +336,7 @@ class HandoverPipeline:
             completed = 0
             cached_count = 0
             processed_count = 0
+            error_count = 0
             
             for future in as_completed(future_to_video):
                 video_file = future_to_video[future]
@@ -338,13 +347,31 @@ class HandoverPipeline:
                     video_summaries.append(video_summary)
                     
                     if video_summary.error:
-                        print(f"❌ [{completed}/{total_videos}] Failed: {video_file.name}")
+                        error_count += 1
+                        status = "❌ ERROR"
+                        color = "\033[91m"  # Red
+                    elif video_cache_status.get(video_file, False):
+                        # Was loaded from cache
+                        cached_count += 1
+                        status = "📦 CACHE"
+                        color = "\033[94m"  # Blue
                     else:
-                        # Note: we don't get info here if it was cached, but the function prints it
-                        print(f"✅ [{completed}/{total_videos}] Done: {video_file.name}")
+                        # Was newly processed
+                        processed_count += 1
+                        status = "✅ DONE "
+                        color = "\033[92m"  # Green
+                    
+                    # Clean progress line
+                    progress_bar = f"[{completed:>{len(str(total_videos))}}/{total_videos}]"
+                    filename = video_file.name[:40] + "..." if len(video_file.name) > 43 else video_file.name
+                    
+                    # Print colored status
+                    reset = "\033[0m"
+                    print(f"{color}{status}{reset} {progress_bar} {filename}")
                         
                 except Exception as e:
-                    print(f"❌ [{completed}/{total_videos}] Error processing {video_file.name}: {e}")
+                    error_count += 1
+                    print(f"❌ ERROR [{completed}/{total_videos}] {video_file.name}: {e}")
                     
                     # Create error video summary
                     video_summary = VideoSummary(
@@ -356,9 +383,18 @@ class HandoverPipeline:
                     )
                     video_summaries.append(video_summary)
 
+        # Final summary
+        print()
+        print(f"{'='*60}")
+        print(f"✅ Completed {completed}/{total_videos} videos")
+        print(f"   📦 Loaded from cache: {cached_count}")
+        print(f"   ⚙️  Newly processed: {processed_count}")
+        if error_count > 0:
+            print(f"   ❌ Errors: {error_count}")
+        print(f"{'='*60}")
+
         # Filter out videos with errors for analysis
         successful = [v for v in video_summaries if not v.error]
-        print(f"\n✅ Successfully loaded: {len(successful)}/{len(video_summaries)} videos")
 
         if len(successful) == 0:
             raise ValueError("No videos were successfully processed")

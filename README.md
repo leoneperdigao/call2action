@@ -197,11 +197,30 @@ These dates are used to create the timeline visualization.
 
 #### Performance and Parallel Processing
 
-The handover pipeline processes videos **in parallel** for maximum efficiency:
+The handover pipeline processes videos **in parallel** for maximum efficiency with **clean, organized logging**:
 
 - **Default**: 4 videos processed simultaneously
 - **Configurable**: Adjust `MAX_PARALLEL_VIDEOS` in `.env` or settings
 - **Resource-aware**: Balance between speed and system resources
+- **Clean Output**: Progress tracking with color-coded status (📦 Cache, ✅ Done, ❌ Error)
+
+Example output:
+```
+🚀 Processing 40 videos in parallel (max 8 at a time)...
+💡 Using cached results where available
+
+📦 CACHE [ 1/40] 2025-10-06_10-35-48.mp4
+✅ DONE  [ 2/40] 2025-10-07_13-05-55.mp4
+📦 CACHE [ 3/40] 2025-10-08_09-02-13.mp4
+...
+
+============================================================
+✅ Completed 40/40 videos
+   📦 Loaded from cache: 35
+   ⚙️  Newly processed: 5
+   ❌ Errors: 0
+============================================================
+```
 
 Example with custom parallelism:
 
